@@ -1,26 +1,32 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { HelloModule } from './hello/hello.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
-import { PostController } from './post/post.controller';
-import { PostService } from './post/post.service';
-import { PostModule } from './post/post.module';
 import appConfig from './config/app.config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Post } from './posts/entities/post.inities';
+import { PostsModule } from './posts/posts.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the configuration available globally
-      envFilePath: '.env', // Path to your environment variables file
+      isGlobal: true,
+      envFilePath: '.env',
       load: [appConfig],
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      entities: [Post], // You can also use: entities: [__dirname + '/**/*.entity{.ts,.js}']
+      synchronize: true,
     }),
     HelloModule,
     UserModule,
-    PostModule,
+    PostsModule,
   ],
-  controllers: [AppController, PostController],
-  providers: [AppService, PostService],
 })
 export class AppModule {}
