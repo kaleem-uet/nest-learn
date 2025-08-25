@@ -5,6 +5,8 @@ import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
 import { AuthController } from './auth.controller';
 import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './strategy/jwt. strategy';
+import { RolesGuard } from './guards/roles.guard';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -14,8 +16,8 @@ import { PassportModule } from '@nestjs/passport';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy, RolesGuard],
   controllers: [AuthController], // Add the role guard here
-  exports: [AuthService],
+  exports: [AuthService, RolesGuard],
 })
 export class AuthModule {}

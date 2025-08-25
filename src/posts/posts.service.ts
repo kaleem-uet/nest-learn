@@ -3,6 +3,7 @@ import { Post } from './entities/post.inities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
+import { User } from 'src/auth/entities/user.entity';
 @Injectable()
 export class PostsService {
   constructor(
@@ -10,7 +11,10 @@ export class PostsService {
   ) {}
 
   async findAll(): Promise<Post[]> {
-    return this.postRepository.find();
+    return this.postRepository.find({
+      relations: ['author'],
+      order: { createdAt: 'DESC' },
+    });
   }
   async findById(id: number): Promise<Post | null> {
     const post = await this.postRepository.findOneBy({ id });
@@ -19,21 +23,46 @@ export class PostsService {
     }
     return post;
   }
-  async create(createPostData: CreatePostDto): Promise<Post> {
-    const newPost = this.postRepository.create(createPostData);
+  async create(createPostData: CreatePostDto, author: User): Promise<Post> {
+    const newPost = this.postRepository.create({
+      title: createPostData.title,
+      content: createPostData.content,
+      author, // correct usage of relation
+    });
     return this.postRepository.save(newPost);
   }
   async update(
     id: number,
-    updatedPost: Partial<Post>,
-  ): Promise<Post | undefined> {
-    const post = await this.postRepository.findOneBy({ id });
+    updatedPostData: Partial<Pick<Post, 'title' | 'content'>>,
+    user: User,
+  ): Promise<Post> {
+    // Fetch the post with the author relation
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['author'],
+    });
+
     if (!post) {
       throw new NotFoundException('Post with the given ID not found');
     }
-    Object.assign(post, updatedPost);
+
+    // Authorization: Only author or admin can update
+    if (post.author.id !== user.id && user.role !== 'admin') {
+      throw new NotFoundException('You are not authorized to update this post');
+    }
+
+    // Only update allowed fields
+    if (updatedPostData.title !== undefined) {
+      post.title = updatedPostData.title;
+    }
+
+    if (updatedPostData.content !== undefined) {
+      post.content = updatedPostData.content;
+    }
+
     return this.postRepository.save(post);
   }
+
   async delete(id: number): Promise<boolean> {
     const post = await this.postRepository.findOneBy({ id });
     if (!post) {

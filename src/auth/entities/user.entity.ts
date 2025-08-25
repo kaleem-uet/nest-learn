@@ -30,7 +30,7 @@ export class User {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @OneToMany(() => Post, (post) => post.authorId)
+  @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
   @CreateDateColumn()
