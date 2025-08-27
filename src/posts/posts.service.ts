@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Post } from './entities/post.inities';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -24,13 +28,24 @@ export class PostsService {
     return post;
   }
   async create(createPostData: CreatePostDto, author: User): Promise<Post> {
+    // ✅ Add validation to ensure author exists
+    if (!author || !author.id) {
+      throw new BadRequestException(
+        'User authentication required to create a post',
+      );
+    }
+
+    console.log('Creating post with author:', author); // Debug log
+
     const newPost = this.postRepository.create({
       title: createPostData.title,
       content: createPostData.content,
-      author, // correct usage of relation
+      author, // This should set both the author relation and authorId
     });
+
     return this.postRepository.save(newPost);
   }
+
   async update(
     id: number,
     updatedPostData: Partial<Pick<Post, 'title' | 'content'>>,

@@ -43,6 +43,7 @@ export class PostsController {
     return this.postsService.findById(id);
   }
 
+  @UseGuards(jwtAuthGuard) // ✅ Add this guard to authenticate the user
   @Post('/create')
   @HttpCode(HttpStatus.CREATED)
   async createPost(
@@ -51,6 +52,7 @@ export class PostsController {
     @CurrentUser() user: any,
   ): Promise<PostEntity> {
     console.log('Validated data:', createPostData);
+    console.log('Authenticated user:', user); // ✅ Add this for debugging
     return this.postsService.create(createPostData, user);
   }
 
