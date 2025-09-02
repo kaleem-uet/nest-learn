@@ -8,13 +8,27 @@ import { Post } from './posts/entities/post.inities';
 import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
-
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 5,
+        },
+      ],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
       load: [appConfig],
+    }),
+    CacheModule.register({
+      ttl: 30000,
+      isGlobal: true,
+      max: 100,
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

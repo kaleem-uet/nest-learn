@@ -13,6 +13,7 @@ import {
   Post,
   UseGuards,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { Post as PostEntity } from './entities/post.inities';
 import { PostsService } from './posts.service';
@@ -26,14 +27,18 @@ import { CurrentUser } from 'src/auth/decorator/current-user.decorator';
 import { Roles } from 'src/auth/decorator/roles.decorator';
 import { UserRole } from 'src/auth/entities/user.entity';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { FindPostQueryDto } from './dto/find-post-query.dto';
+import { PaginatedResponse } from 'src/common/interfaces/paginated.responce.interface';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  async getAllPosts(): Promise<PostEntity[]> {
-    return this.postsService.findAll();
+  async getAllPosts(
+    @Query() query: FindPostQueryDto,
+  ): Promise<PaginatedResponse<PostEntity>> {
+    return this.postsService.findAll(query);
   }
 
   @Get(':id')

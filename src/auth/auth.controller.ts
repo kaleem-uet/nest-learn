@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register.user.dto';
 import { LoginUserDto } from './dto/login.user.dto';
@@ -16,6 +7,7 @@ import { CurrentUser } from './decorator/current-user.decorator';
 import { Roles } from './decorator/roles.decorator';
 import { UserRole } from './entities/user.entity';
 import { RolesGuard } from './guards/roles.guard';
+import { ThrottlerLoginGuard } from './guards/throttler.login.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -25,6 +17,8 @@ export class AuthController {
   async register(@Body() registerDto: RegisterUserDto) {
     return this.authService.register(registerDto);
   }
+
+  @UseGuards(ThrottlerLoginGuard)
   @Post('login')
   async login(@Body() loginDto: LoginUserDto) {
     return this.authService.login(loginDto);
