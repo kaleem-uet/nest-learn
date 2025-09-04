@@ -10,6 +10,8 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { FileUploadModule } from './file-upload/file-upload.module';
+import { File } from './file-upload/entities/file.entity';
 @Module({
   imports: [
     ThrottlerModule.forRoot({
@@ -37,13 +39,14 @@ import { CacheModule } from '@nestjs/cache-manager';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Post, User], // You can also use: entities: [__dirname + '/**/*.entity{.ts,.js}']
+      entities: [Post, User, File], // You can also use: entities: [__dirname + '/**/*.entity{.ts,.js}']
       synchronize: true,
     }),
     HelloModule,
     UserModule,
     PostsModule,
     AuthModule,
+    FileUploadModule,
   ],
 })
 export class AppModule {}
