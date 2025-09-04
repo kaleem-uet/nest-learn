@@ -27,9 +27,11 @@ export class File {
   @Column()
   publicId: string;
 
-  @ManyToOne(() => User, { eager: true })
   @Column({ nullable: true })
   description?: string;
+
+  @ManyToOne(() => User, { eager: true, nullable: true })
+  user?: User;
 
   @CreateDateColumn()
   createdAt: Date;
