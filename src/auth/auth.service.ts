@@ -110,7 +110,7 @@ export class AuthService {
   }
 
   async getCurrentUser(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
     }

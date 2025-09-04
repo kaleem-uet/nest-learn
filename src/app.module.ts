@@ -8,13 +8,29 @@ import { Post } from './posts/entities/post.inities';
 import { PostsModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
-
+import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule } from '@nestjs/cache-manager';
+import { FileUploadModule } from './file-upload/file-upload.module';
+import { File } from './file-upload/entities/file.entity';
 @Module({
   imports: [
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 5,
+        },
+      ],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
       load: [appConfig],
+    }),
+    CacheModule.register({
+      ttl: 30000,
+      isGlobal: true,
+      max: 100,
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -23,13 +39,14 @@ import { User } from './auth/entities/user.entity';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      entities: [Post, User], // You can also use: entities: [__dirname + '/**/*.entity{.ts,.js}']
+      entities: [Post, User, File], // You can also use: entities: [__dirname + '/**/*.entity{.ts,.js}']
       synchronize: true,
     }),
     HelloModule,
     UserModule,
     PostsModule,
     AuthModule,
+    FileUploadModule,
   ],
 })
 export class AppModule {}
